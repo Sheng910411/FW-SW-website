@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台灣軟韌體工程師職涯導航 | 碩士新鮮人指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        stoneBg: '#F7F5F0',
+                        stoneCard: '#FFFFFF',
+                        stoneText: '#333333',
+                        stoneMuted: '#6B7280',
+                        accentTerra: '#D97757',
+                        accentTeal: '#5C7C8A',
+                        accentTealLight: '#E8F0F2'
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #F7F5F0;
+            color: #333333;
+        }
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-wrapper {
+                height: 450px;
+            }
+        }
+        .tab-btn.active {
+            border-bottom: 2px solid #D97757;
+            color: #D97757;
+            font-weight: bold;
+        }
+        .region-btn.active {
+            background-color: #5C7C8A;
+            color: white;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Chosen Palette: Warm Neutrals & Muted Accents (Stone, Terracotta, Teal) -->
+    <!-- Application Structure Plan: The SPA is structured as a continuous scrolling dashboard designed for a Master's graduate. It starts with an executive summary, moves into Geographic Distribution (interactive region selection), then Company Tiers (interactive scatter plot for Salary vs WLB), and concludes with a Freshers Guide (tabbed interface for decision making). This structure logically guides the user from macro-level industry understanding down to micro-level personal career choices. -->
+    <!-- Visualization & Content Choices: 1. Geography: Doughnut Chart (Chart.js) + Interactive Buttons to show region dominance without clutter. 2. Company Tiers: Scatter Plot (Chart.js) showing Salary vs Work-Life Balance to visualize the trade-offs in the tech industry. 3. Freshers Guide: Interactive Tabs to organize text-heavy advice into digestible chunks. NO SVG/Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <nav class="sticky top-0 z-50 bg-stoneCard/90 backdrop-blur-sm shadow-sm border-b border-gray-200">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold text-accentTeal tracking-wider">FW/SW Career Nav 🧭</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#overview" class="text-stoneText hover:text-accentTerra transition-colors">總覽</a>
+                    <a href="#geography" class="text-stoneText hover:text-accentTerra transition-colors">地理分佈</a>
+                    <a href="#tiers" class="text-stoneText hover:text-accentTerra transition-colors">公司排名與落點</a>
+                    <a href="#guide" class="text-stoneText hover:text-accentTerra transition-colors">新鮮人指南</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
+
+        <section id="overview" class="text-center py-12 md:py-20 animate-fade-in">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-stoneText mb-6">台灣軟韌體工程師職涯分析報告</h1>
+            <p class="text-lg md:text-xl text-stoneMuted max-w-3xl mx-auto leading-relaxed">
+                專為即將取得碩士學位的科技業新鮮人打造。本互動指南彙整了全台（大台北、桃園、新竹、台中）的軟韌體 (Firmware/Software) 職缺分佈、公司分級雷達，以及教你如何評估第一份工作的實戰指南。
+            </p>
+        </section>
+
+        <section id="geography" class="bg-stoneCard rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10">
+            <div class="mb-8 border-b border-gray-100 pb-4">
+                <h2 class="text-3xl font-bold text-stoneText mb-2">📍 科技聚落與地理分佈</h2>
+                <p class="text-stoneMuted">了解各縣市的產業特性，點擊下方按鈕探索不同區域的軟韌體職缺生態。</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+                <div class="order-2 lg:order-1">
+                    <div class="chart-wrapper">
+                        <canvas id="regionChart"></canvas>
+                    </div>
+                </div>
+                <div class="order-1 lg:order-2 flex flex-col space-y-6">
+                    <div class="flex flex-wrap gap-3" id="region-buttons">
+                        <button class="region-btn active px-4 py-2 rounded-full border border-accentTeal text-accentTeal font-medium transition-all" data-region="hsinchu">新竹 (竹科)</button>
+                        <button class="region-btn px-4 py-2 rounded-full border border-accentTeal text-accentTeal font-medium transition-all" data-region="taipei">大台北</button>
+                        <button class="region-btn px-4 py-2 rounded-full border border-accentTeal text-accentTeal font-medium transition-all" data-region="taoyuan">桃園</button>
+                        <button class="region-btn px-4 py-2 rounded-full border border-accentTeal text-accentTeal font-medium transition-all" data-region="taichung">台中</button>
+                    </div>
+                    
+                    <div id="region-details" class="bg-accentTealLight p-6 rounded-xl border-l-4 border-accentTeal min-h-[200px]">
+                        <h3 class="text-xl font-bold text-accentTeal mb-3" id="rd-title">新竹 (竹科) - 台灣矽谷</h3>
+                        <p class="text-stoneText mb-4 leading-relaxed" id="rd-desc">全台最大的IC設計與半導體聚落。軟韌體工程師在此主要負責底層驅動、SoC整合、演算法實現。薪資天花板最高，但競爭與壓力也最大。</p>
+                        <div class="font-semibold text-stoneText">代表企業：</div>
+                        <ul class="list-disc list-inside text-stoneMuted mt-1" id="rd-companies">
+                            <li>聯發科 (MTK), 聯詠 (Novatek), 瑞昱 (Realtek)</li>
+                            <li>群聯 (Phison), 台積電 (TSMC IT/Equipment FW)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tiers" class="bg-stoneCard rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10">
+            <div class="mb-8 border-b border-gray-100 pb-4">
+                <h2 class="text-3xl font-bold text-stoneText mb-2">🏆 公司排名與落點分析</h2>
+                <p class="text-stoneMuted">軟韌體工程師在不同產業的薪資與生活品質 (WLB) 呈現顯著負相關。下方散佈圖展示了各Tier公司的粗略落點（以碩士新人為基準）。</p>
+            </div>
+
+            <div class="chart-wrapper w-full mb-8">
+                <canvas id="tierChart"></canvas>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="p-5 bg-gray-50 rounded-lg border border-gray-100">
+                    <h3 class="text-lg font-bold text-accentTerra mb-2">Tier 1: 一線 IC 設計 / 外商</h3>
+                    <p class="text-sm text-stoneMuted mb-2">年薪預估：150W - 200W+ TWD</p>
+                    <p class="text-sm text-stoneText">以 MTK、Novatek、Google 為主。薪資極高，分紅多，技術挑戰大。缺點是工時長，高壓，適合剛畢業想快速累積資產的新鮮人。</p>
+                </div>
+                <div class="p-5 bg-gray-50 rounded-lg border border-gray-100">
+                    <h3 class="text-lg font-bold text-accentTeal mb-2">Tier 2: 頂尖系統廠 / 二線 IC</h3>
+                    <p class="text-sm text-stoneMuted mb-2">年薪預估：90W - 140W TWD</p>
+                    <p class="text-sm text-stoneText">如 Garmin, 華碩, 廣達, 達發。具有不錯的薪水，且 WLB (Work-Life Balance) 普遍比一線IC廠好很多。適合追求生活品質與穩定發展的人。</p>
+                </div>
+                <div class="p-5 bg-gray-50 rounded-lg border border-gray-100">
+                    <h3 class="text-lg font-bold text-stoneMuted mb-2">Tier 3: 一般系統廠 / IPC / 傳產</h3>
+                    <p class="text-sm text-stoneMuted mb-2">年薪預估：70W - 90W TWD</p>
+                    <p class="text-sm text-stoneText">如 研華, 緯創(部分部門), 仁寶。薪水穩定，大多可準時上下班。適合以家庭為重，或作為刷履歷跳槽的跳板。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="guide" class="bg-stoneCard rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10 mb-20">
+            <div class="mb-8 border-b border-gray-100 pb-4">
+                <h2 class="text-3xl font-bold text-stoneText mb-2">🎓 新鮮人指南：如何選擇第一份工作？</h2>
+                <p class="text-stoneMuted">作為擁有碩士學歷的新鮮人，除了看薪水，更要看未來的發展性與工作內容。請透過下方標籤切換關鍵評估維度。</p>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-8">
+                <div class="md:w-1/4 flex flex-col space-y-2 border-r border-gray-100 pr-4" id="guide-tabs">
+                    <button class="tab-btn active text-left py-3 px-4 rounded-lg hover:bg-stoneBg transition-colors" data-target="domain">1. 產業與產品領域 (Domain)</button>
+                    <button class="tab-btn text-left py-3 px-4 rounded-lg hover:bg-stoneBg transition-colors" data-target="tech">2. 技術深度與內容</button>
+                    <button class="tab-btn text-left py-3 px-4 rounded-lg hover:bg-stoneBg transition-colors" data-target="culture">3. 系統廠 vs IC設計廠</button>
+                    <button class="tab-btn text-left py-3 px-4 rounded-lg hover:bg-stoneBg transition-colors" data-target="interview">4. 面試與職涯規劃</button>
+                </div>
+
+                <div class="md:w-3/4" id="guide-content">
+                    
+                    <div id="content-domain" class="guide-panel animate-fade-in block">
+                        <h3 class="text-2xl font-bold text-accentTerra mb-4">選擇有前景的 Domain Know-how</h3>
+                        <p class="text-stoneText mb-4">軟韌體工程師的價值很大一部分建立在你懂什麼「產品」。</p>
+                        <ul class="space-y-4">
+                            <li class="p-4 bg-stoneBg rounded-lg border border-gray-200">
+                                <strong class="text-lg block mb-1">伺服器 / 雲端 (Server/Cloud) 🟢 推薦</strong>
+                                <span class="text-stoneMuted">AI 伺服器爆發，BMC (Baseboard Management Controller)、BIOS 韌體需求極大。廣達、緯穎等系統廠給薪已逼近二線IC，且技術通用性高。</span>
+                            </li>
+                            <li class="p-4 bg-stoneBg rounded-lg border border-gray-200">
+                                <strong class="text-lg block mb-1">車用電子 (Automotive) 🟢 推薦</strong>
+                                <span class="text-stoneMuted">電動車、自駕車崛起。需要嚴謹的 ISO 26262 標準經驗，進入門檻高，未來不易被取代。</span>
+                            </li>
+                            <li class="p-4 bg-stoneBg rounded-lg border border-gray-200">
+                                <strong class="text-lg block mb-1">消費性電子 (Consumer PC/Mobile) 🟡 飽和</strong>
+                                <span class="text-stoneMuted">筆電、手機市場已高度成熟，成長動能趨緩。除非是一線大廠的核心部門，否則建議作為跳板即可。</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div id="content-tech" class="guide-panel animate-fade-in hidden">
+                        <h3 class="text-2xl font-bold text-accentTerra mb-4">看懂 Job Description (工作內容)</h3>
+                        <p class="text-stoneText mb-4">韌體是一個很廣的詞，面試時務必問清楚是偏向哪一層級：</p>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="text-2xl mr-3">⚙️</div>
+                                <div>
+                                    <strong class="text-lg">底層韌體 (Bare-metal / BSP / Driver)</strong>
+                                    <p class="text-stoneMuted mt-1">直接對接硬體(Datasheet)、示波器。需要極強的 C 語言、指標、記憶體管理能力。發展極佳，但極度枯燥與燒腦。</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="text-2xl mr-3">🖥️</div>
+                                <div>
+                                    <strong class="text-lg">作業系統層 (Linux Kernel / RTOS)</strong>
+                                    <p class="text-stoneMuted mt-1">負責作業系統移植、排程優化。含金量高，是各家科技廠搶手人才。</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="text-2xl mr-3">📱</div>
+                                <div>
+                                    <strong class="text-lg">應用層次韌體 (App/Middleware)</strong>
+                                    <p class="text-stoneMuted mt-1">偏向軟體(C++/Python)。負責實作通訊協定(Wi-Fi, Bluetooth)、UI邏輯或演算法整合。如果不想碰太多硬體，這是好選擇。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="content-culture" class="guide-panel animate-fade-in hidden">
+                        <h3 class="text-2xl font-bold text-accentTerra mb-4">系統廠 (System House) vs IC 設計廠 (Design House)</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-100 text-stoneText">
+                                        <th class="p-3 border-b border-gray-200">比較維度</th>
+                                        <th class="p-3 border-b border-gray-200">IC 設計廠 (如聯發科)</th>
+                                        <th class="p-3 border-b border-gray-200">系統廠 (如廣達/華碩)</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-stoneMuted">
+                                    <tr class="border-b border-gray-100">
+                                        <td class="p-3 font-bold text-stoneText">核心角色</td>
+                                        <td class="p-3">製造晶片，提供公版方案</td>
+                                        <td class="p-3">買晶片組裝成終端產品</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-100">
+                                        <td class="p-3 font-bold text-stoneText">韌體重點</td>
+                                        <td class="p-3">驗證晶片Bug、開發底層驅動</td>
+                                        <td class="p-3">整合不同晶片、解系統級Bug、客製化</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-100">
+                                        <td class="p-3 font-bold text-stoneText">技術深度 vs 廣度</td>
+                                        <td class="p-3">極深 (專精某個IP區塊)</td>
+                                        <td class="p-3">極廣 (從MCU到OS都要摸一點)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-bold text-stoneText">薪水與壓力</td>
+                                        <td class="p-3 text-accentTerra">高薪、高壓、工時長</td>
+                                        <td class="p-3 text-accentTeal">中等薪水、壓力較小(除特定單位)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="content-interview" class="guide-panel animate-fade-in hidden">
+                        <h3 class="text-2xl font-bold text-accentTerra mb-4">給碩士畢業生的行動建議</h3>
+                        <ol class="list-decimal list-inside space-y-3 text-stoneText">
+                            <li><strong class="text-accentTeal">C語言是絕對核心：</strong> 刷 LeetCode 以外，務必熟悉指標 (Pointer)、Bitwise 操作、記憶體配置、Volatile 關鍵字等考題。</li>
+                            <li><strong class="text-accentTeal">展現 Debug 能力：</strong> 面試主管最愛問「遇過最難解的 Bug 是什麼？如何解決？」。要有條理地講述從發現問題、推論、驗證到解決的過程。</li>
+                            <li><strong class="text-accentTeal">碩士論文的關聯性：</strong> 如果論文跟韌體無關，請務必準備一個 Github Side Project (如：用 STM32 寫一個小飛控、寫一個 Linux 簡單的字元驅動程式)。</li>
+                            <li><strong class="text-accentTeal">心態建立：</strong> 第一份工作決定了你前三年的視野。如果有能力，盡量往上游 (IC Design) 或高毛利領域 (Server/Auto) 擠。</li>
+                        </ol>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stoneText text-stoneBg py-8 text-center text-sm">
+        <p>© 2026 Firmware Career Navigator. Created for future engineers in Taiwan.</p>
+    </footer>
+
+    <script>
+        const regionDataInfo = {
+            hsinchu: {
+                title: "新竹 (竹科) - 台灣矽谷",
+                desc: "全台最大的IC設計與半導體聚落。軟韌體工程師在此主要負責底層驅動、SoC整合、演算法實現。薪資天花板最高，但競爭與壓力也最大。",
+                companies: ["聯發科 (MTK), 聯詠 (Novatek), 瑞昱 (Realtek)", "群聯 (Phison), 台積電 (TSMC IT/Equipment FW)", "各大外商 EDA/IP 廠"]
+            },
+            taipei: {
+                title: "大台北 (內湖/南港/汐止/新北)",
+                desc: "外商軟體、雲端服務與大型系統廠/網通廠的聚集地。資源豐富，生活機能佳。外商缺多，英文能力要求較高。",
+                companies: ["Google, Microsoft, Amazon", "華碩 (ASUS), 佳明 (Garmin)", "群光, 瑞鼎, 威盛, 各大網通廠"]
+            },
+            taoyuan: {
+                title: "桃園 (龜山/中壢)",
+                desc: "系統大廠與伺服器代工的重鎮。近年AI伺服器需求大增，BIOS/BMC韌體工程師在此區域非常搶手。",
+                companies: ["廣達 (Quanta), 緯創 (Wistron)", "英業達 (Inventec), 神達", "台達電 (部分廠區)"]
+            },
+            taichung: {
+                title: "台中 (中科/精密機械園區)",
+                desc: "光學、精密機械與部分半導體封測/記憶體廠。純軟韌體缺相對北部較少，多與機電整合、自動化控制相關。",
+                companies: ["大立光", "台灣美光 (Micron)", "矽品, 台積電(中科廠)"]
+            }
+        };
+
+        const regionButtons = document.querySelectorAll('.region-btn');
+        const rdTitle = document.getElementById('rd-title');
+        const rdDesc = document.getElementById('rd-desc');
+        const rdCompanies = document.getElementById('rd-companies');
+
+        regionButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                regionButtons.forEach(b => {
+                    b.classList.remove('active');
+                    b.style.backgroundColor = 'transparent';
+                    b.style.color = '#5C7C8A';
+                });
+                
+                const target = e.target;
+                target.classList.add('active');
+                target.style.backgroundColor = '#5C7C8A';
+                target.style.color = 'white';
+
+                const regionKey = target.getAttribute('data-region');
+                const info = regionDataInfo[regionKey];
+
+                rdTitle.textContent = info.title;
+                rdDesc.textContent = info.desc;
+                rdCompanies.innerHTML = info.companies.map(c => `<li>${c}</li>`).join('');
+            });
+        });
+
+        const guideTabs = document.querySelectorAll('.tab-btn');
+        const guidePanels = document.querySelectorAll('.guide-panel');
+
+        guideTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                guideTabs.forEach(t => t.classList.remove('active'));
+                
+                guidePanels.forEach(p => {
+                    p.classList.remove('block');
+                    p.classList.add('hidden');
+                });
+
+                const target = e.target;
+                target.classList.add('active');
+                const contentId = `content-${target.getAttribute('data-target')}`;
+                
+                const activePanel = document.getElementById(contentId);
+                activePanel.classList.remove('hidden');
+                activePanel.classList.add('block');
+            });
+        });
+
+        const ctxRegion = document.getElementById('regionChart').getContext('2d');
+        new Chart(ctxRegion, {
+            type: 'doughnut',
+            data: {
+                labels: ['新竹 (45%)', '大台北 (30%)', '桃園 (15%)', '台中及其他 (10%)'],
+                datasets: [{
+                    data: [45, 30, 15, 10],
+                    backgroundColor: [
+                        '#5C7C8A',
+                        '#D97757',
+                        '#A0B2BA',
+                        '#E5C1B3'
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { font: { family: '"Noto Sans TC", sans-serif', size: 14 } }
+                    },
+                    title: {
+                        display: true,
+                        text: '軟韌體職缺地理分佈估計',
+                        font: { family: '"Noto Sans TC", sans-serif', size: 18 }
+                    }
+                }
+            }
+        });
+
+        const ctxTier = document.getElementById('tierChart').getContext('2d');
+        new Chart(ctxTier, {
+            type: 'scatter',
+            data: {
+                datasets: [
+                    {
+                        label: 'Tier 1 (IC設計/外商)',
+                        data: [
+                            {x: 3, y: 180, name: '聯發科'},
+                            {x: 4, y: 170, name: '聯詠'},
+                            {x: 4, y: 160, name: '瑞昱'},
+                            {x: 7, y: 200, name: 'Google (外商)'}
+                        ],
+                        backgroundColor: '#D97757',
+                        pointRadius: 8,
+                        pointHoverRadius: 10
+                    },
+                    {
+                        label: 'Tier 2 (頂尖系統/二線IC)',
+                        data: [
+                            {x: 7, y: 120, name: 'Garmin'},
+                            {x: 6, y: 110, name: '華碩'},
+                            {x: 5, y: 130, name: '達發'},
+                            {x: 5, y: 100, name: '廣達 (AI Server)'}
+                        ],
+                        backgroundColor: '#5C7C8A',
+                        pointRadius: 8,
+                        pointHoverRadius: 10
+                    },
+                    {
+                        label: 'Tier 3 (一般系統/IPC)',
+                        data: [
+                            {x: 8, y: 80, name: '研華'},
+                            {x: 7, y: 85, name: '緯創'},
+                            {x: 8, y: 75, name: '仁寶'}
+                        ],
+                        backgroundColor: '#A0B2BA',
+                        pointRadius: 8,
+                        pointHoverRadius: 10
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        title: { display: true, text: '生活品質 Work-Life Balance (1=狂加班, 10=準時下班)', font: {size: 14} },
+                        min: 1, max: 10
+                    },
+                    y: {
+                        title: { display: true, text: '新人年薪預估 (萬台幣)', font: {size: 14} },
+                        min: 50, max: 250
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.raw.name + ': 年薪約 ' + context.raw.y + 'W, WLB評分: ' + context.raw.x;
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
