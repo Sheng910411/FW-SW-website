@@ -33,7 +33,7 @@
 
 本網站已自動化部署至 Vercel。任何推送到 `main` 分支的更新都會自動觸發 CI/CD 流程並更新至正式網址。
 
-* **Live Demo:** [這裡替換成你的 Vercel 網址:https://fw-sw-website.vercel.app/ ]
+* **Live Demo:** https://fw-sw-website.vercel.app/
 
 ## 🤝 貢獻與反饋 (Contributing)
 
